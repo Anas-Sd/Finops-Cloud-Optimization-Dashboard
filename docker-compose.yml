@@ -1,0 +1,214 @@
+version: '3.8'
+
+services:
+  # ===========================================================================
+  # SIMULATED MICROSERVICES (12 containers: ~60% idle, ~40% load)
+  # ===========================================================================
+
+  # Payments Team
+  checkout-service:
+    image: busybox:latest
+    container_name: checkout-service
+    labels:
+      team: "payments"
+      cost_per_hour: "1.25"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    command: sh -c "sleep infinity"
+    restart: always
+
+  payment-gateway:
+    image: alpine:latest
+    container_name: payment-gateway
+    labels:
+      team: "payments"
+      cost_per_hour: "2.50"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 512M
+    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    restart: always
+
+  # Platform Team
+  user-auth:
+    image: busybox:latest
+    container_name: user-auth
+    labels:
+      team: "platform"
+      cost_per_hour: "1.00"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    command: sh -c "sleep infinity"
+    restart: always
+
+  api-gateway:
+    image: alpine:latest
+    container_name: api-gateway
+    labels:
+      team: "platform"
+      cost_per_hour: "4.80"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 1024M
+    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    restart: always
+
+  inventory-api:
+    image: busybox:latest
+    container_name: inventory-api
+    labels:
+      team: "platform"
+      cost_per_hour: "1.50"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    command: sh -c "sleep infinity"
+    restart: always
+
+  search-service:
+    image: alpine:latest
+    container_name: search-service
+    labels:
+      team: "platform"
+      cost_per_hour: "3.20"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.50'
+          memory: 512M
+    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    restart: always
+
+  # Growth Team
+  notification-worker:
+    image: busybox:latest
+    container_name: notification-worker
+    labels:
+      team: "growth"
+      cost_per_hour: "1.10"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    command: sh -c "sleep infinity"
+    restart: always
+
+  email-service:
+    image: busybox:latest
+    container_name: email-service
+    labels:
+      team: "growth"
+      cost_per_hour: "0.80"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+    command: sh -c "sleep infinity"
+    restart: always
+
+  recommendation-engine:
+    image: alpine:latest
+    container_name: recommendation-engine
+    labels:
+      team: "growth"
+      cost_per_hour: "5.00"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 1024M
+    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    restart: always
+
+  cache-warmer:
+    image: busybox:latest
+    container_name: cache-warmer
+    labels:
+      team: "growth"
+      cost_per_hour: "1.40"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    command: sh -c "sleep infinity"
+    restart: always
+
+  # Infra Team
+  log-aggregator:
+    image: busybox:latest
+    container_name: log-aggregator
+    labels:
+      team: "infra"
+      cost_per_hour: "1.80"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    command: sh -c "sleep infinity"
+    restart: always
+
+  metrics-collector:
+    image: alpine:latest
+    container_name: metrics-collector
+    labels:
+      team: "infra"
+      cost_per_hour: "2.20"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 512M
+    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    restart: always
+
+  # ===========================================================================
+  # FINOPS DASHBOARD BACKEND
+  # ===========================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: finops-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - backend-db:/app/data
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - DB_PATH=/app/data/finops.db
+    restart: always
+
+  # ===========================================================================
+  # FINOPS DASHBOARD FRONTEND
+  # ===========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: finops-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  backend-db:
