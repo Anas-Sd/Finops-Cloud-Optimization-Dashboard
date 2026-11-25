@@ -149,7 +149,9 @@ export default function LiveDataSource() {
                       <td className="py-4 px-4 font-mono text-xs">
                         <div className="space-y-1">
                           <div className="flex justify-between text-slate-300">
-                            <span className="font-semibold text-white">{c.cpuPercent}%</span>
+                            <span className="font-semibold text-white">
+                              {c.cpuUtilVsLimit !== undefined ? c.cpuUtilVsLimit : c.cpuPercent}%
+                            </span>
                             <span className="text-slate-400">({c.cpuUsedCores} / {c.cpuLimitCores} Cores)</span>
                           </div>
                           <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
@@ -157,7 +159,7 @@ export default function LiveDataSource() {
                               className={`h-1.5 rounded-full transition-all duration-500 ${
                                 isIdle ? 'bg-amber-400' : 'bg-emerald-400'
                               }`}
-                              style={{ width: `${Math.min(100, (c.cpuUsedCores / c.cpuLimitCores) * 100)}%` }}
+                              style={{ width: `${Math.min(100, c.cpuUtilVsLimit !== undefined ? c.cpuUtilVsLimit : (c.cpuUsedCores / c.cpuLimitCores) * 100)}%` }}
                             ></div>
                           </div>
                         </div>

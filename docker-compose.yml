@@ -23,6 +23,7 @@ services:
   payment-gateway:
     image: alpine:latest
     container_name: payment-gateway
+    shm_size: 128m
     labels:
       team: "payments"
       cost_per_hour: "2.50"
@@ -31,7 +32,7 @@ services:
         limits:
           cpus: '1.00'
           memory: 512M
-    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "dd if=/dev/zero of=/dev/shm/app_mem bs=1M count=60 2>/dev/null; while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   # Platform Team
@@ -52,6 +53,7 @@ services:
   api-gateway:
     image: alpine:latest
     container_name: api-gateway
+    shm_size: 256m
     labels:
       team: "platform"
       cost_per_hour: "4.80"
@@ -60,7 +62,7 @@ services:
         limits:
           cpus: '2.00'
           memory: 1024M
-    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "dd if=/dev/zero of=/dev/shm/app_mem bs=1M count=120 2>/dev/null; while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   inventory-api:
@@ -80,6 +82,7 @@ services:
   search-service:
     image: alpine:latest
     container_name: search-service
+    shm_size: 128m
     labels:
       team: "platform"
       cost_per_hour: "3.20"
@@ -88,7 +91,7 @@ services:
         limits:
           cpus: '1.50'
           memory: 512M
-    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "dd if=/dev/zero of=/dev/shm/app_mem bs=1M count=75 2>/dev/null; while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   # Growth Team
@@ -123,6 +126,7 @@ services:
   recommendation-engine:
     image: alpine:latest
     container_name: recommendation-engine
+    shm_size: 256m
     labels:
       team: "growth"
       cost_per_hour: "5.00"
@@ -131,7 +135,7 @@ services:
         limits:
           cpus: '2.00'
           memory: 1024M
-    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "dd if=/dev/zero of=/dev/shm/app_mem bs=1M count=140 2>/dev/null; while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   cache-warmer:
@@ -166,6 +170,7 @@ services:
   metrics-collector:
     image: alpine:latest
     container_name: metrics-collector
+    shm_size: 128m
     labels:
       team: "infra"
       cost_per_hour: "2.20"
@@ -174,7 +179,7 @@ services:
         limits:
           cpus: '1.00'
           memory: 512M
-    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "dd if=/dev/zero of=/dev/shm/app_mem bs=1M count=55 2>/dev/null; while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   # ===========================================================================
