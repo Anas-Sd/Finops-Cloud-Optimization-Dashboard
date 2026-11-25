@@ -120,7 +120,7 @@ export default function LiveDataSource() {
               ) : (
                 containers.map((c) => {
                   const isUpdated = updatedIds.has(c.containerId);
-                  const isIdle = c.cpuPercent < 5;
+                  const isIdle = c.isIdle !== undefined ? c.isIdle : (c.cpuPercent < 10);
 
                   return (
                     <tr

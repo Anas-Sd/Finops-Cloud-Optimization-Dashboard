@@ -31,7 +31,7 @@ services:
         limits:
           cpus: '1.00'
           memory: 512M
-    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   # Platform Team
@@ -60,7 +60,7 @@ services:
         limits:
           cpus: '2.00'
           memory: 1024M
-    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   inventory-api:
@@ -88,7 +88,7 @@ services:
         limits:
           cpus: '1.50'
           memory: 512M
-    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   # Growth Team
@@ -131,7 +131,7 @@ services:
         limits:
           cpus: '2.00'
           memory: 1024M
-    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   cache-warmer:
@@ -174,7 +174,7 @@ services:
         limits:
           cpus: '1.00'
           memory: 512M
-    command: sh -c "while true; do echo 999999999 | awk '{for(i=0;i<10000;i++) sum+=i}'; sleep 0.1; done"
+    command: sh -c "while true; do awk 'BEGIN {for(i=0;i<1200000;i++) sum+=i}'; sleep 0.1; done"
     restart: always
 
   # ===========================================================================

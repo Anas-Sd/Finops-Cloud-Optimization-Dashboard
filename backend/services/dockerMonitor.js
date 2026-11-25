@@ -15,6 +15,7 @@ if (fs.existsSync('/var/run/docker.sock')) {
 
 let latestLiveStats = [];
 let ioInstance = null;
+const smoothedMetrics = {};
 
 /**
  * Calculate CPU % from Docker stats using standard Docker CLI CPU delta formula
@@ -82,18 +83,45 @@ async function pollContainerStats() {
         const container = docker.getContainer(containerInfo.Id);
         const stats = await container.stats({ stream: false });
 
-        const { cpuPercent, cpuUsedCores } = calculateCpuPercent(stats);
+        const rawCpu = calculateCpuPercent(stats);
 
-        // Calculate Memory Usage & Limit
+        // Smooth CPU metrics using Exponential Moving Average to prevent erratic 2-second jitter
+        if (!smoothedMetrics[containerName]) {
+          smoothedMetrics[containerName] = {
+            cpuPercent: rawCpu.cpuPercent,
+            cpuUsedCores: rawCpu.cpuUsedCores
+          };
+        } else {
+          // 60% historical + 40% new sample
+          smoothedMetrics[containerName].cpuPercent = Number(
+            (0.6 * smoothedMetrics[containerName].cpuPercent + 0.4 * rawCpu.cpuPercent).toFixed(2)
+          );
+          smoothedMetrics[containerName].cpuUsedCores = Number(
+            (0.6 * smoothedMetrics[containerName].cpuUsedCores + 0.4 * rawCpu.cpuUsedCores).toFixed(3)
+          );
+        }
+
+        const cpuPercent = smoothedMetrics[containerName].cpuPercent;
+        const cpuUsedCores = smoothedMetrics[containerName].cpuUsedCores;
+
+        // Calculate Memory Usage (subtract OS buffer/cache for accurate app RAM usage)
         const cache = stats.memory_stats?.stats?.cache || stats.memory_stats?.stats?.inactive_file || 0;
         const rawUsage = (stats.memory_stats?.usage || 0) - cache;
         const memUsedMB = Number(Math.max(0, rawUsage / (1024 * 1024)).toFixed(1));
 
-        // Memory Limit in MB
-        const memLimitBytes = stats.memory_stats?.limit || 0;
-        const memLimitMBFromStats = memLimitBytes > 0 ? memLimitBytes / (1024 * 1024) : meta.memLimitMB;
-        const memLimitMB = Number(memLimitMBFromStats.toFixed(1));
-        const memPercent = memLimitMB > 0 ? Number(((memUsedMB / memLimitMB) * 100).toFixed(2)) : 0;
+        // Memory Limit in MB - use declared limit for accurate FinOps percentage
+        const declaredMemLimitMB = meta.memLimitMB || 256;
+        const memPercent = declaredMemLimitMB > 0 
+          ? Number(((memUsedMB / declaredMemLimitMB) * 100).toFixed(2)) 
+          : 0;
+
+        // Calculate utilization % against declared CPU limits
+        const cpuUtilVsLimit = meta.cpuLimitCores > 0 
+          ? Number(((cpuUsedCores / meta.cpuLimitCores) * 100).toFixed(1)) 
+          : cpuPercent;
+
+        // Stable classification: idle if utilization against allocated limit is < 20%
+        const isIdle = cpuUtilVsLimit < 20 && memPercent < 20;
 
         const statRecord = {
           containerId: containerInfo.Id.substring(0, 12),
@@ -103,9 +131,11 @@ async function pollContainerStats() {
           cpuPercent,
           cpuUsedCores,
           cpuLimitCores: meta.cpuLimitCores,
+          cpuUtilVsLimit,
           memUsedMB,
-          memLimitMB: meta.memLimitMB || memLimitMB,
+          memLimitMB: declaredMemLimitMB,
           memPercent,
+          isIdle,
           costPerHour: meta.costPerHour,
           timestamp: new Date().toISOString()
         };
