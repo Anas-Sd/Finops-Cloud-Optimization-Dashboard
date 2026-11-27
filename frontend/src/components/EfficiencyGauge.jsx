@@ -31,12 +31,18 @@ export default function EfficiencyGauge({ analytics }) {
           </div>
           <div>
             <h3 className="font-bold text-white text-lg">FinOps Cluster Efficiency Score</h3>
-            <p className="text-xs text-slate-400">Composite efficiency index computed across all 12 workloads</p>
+            <p className="text-xs text-slate-400">Composite efficiency index computed across all {analytics?.containerUtilizationList?.length || 19} workloads</p>
           </div>
         </div>
-        <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase border ${scoreTheme.bg} ${scoreTheme.text} ${scoreTheme.border}`}>
-          {rating} Score
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-2.5 py-0.5 rounded-full font-mono font-bold border border-emerald-500/30 flex items-center gap-1.5 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Live 2s
+          </span>
+          <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase border ${scoreTheme.bg} ${scoreTheme.text} ${scoreTheme.border}`}>
+            {rating} Score
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">

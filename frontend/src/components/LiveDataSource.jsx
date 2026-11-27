@@ -147,22 +147,28 @@ export default function LiveDataSource() {
                         </span>
                       </td>
                       <td className="py-4 px-4 font-mono text-xs">
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-slate-300">
-                            <span className="font-semibold text-white">
-                              {c.cpuUtilVsLimit !== undefined ? c.cpuUtilVsLimit : c.cpuPercent}%
-                            </span>
-                            <span className="text-slate-400">({c.cpuUsedCores} / {c.cpuLimitCores} Cores)</span>
-                          </div>
-                          <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
-                            <div
-                              className={`h-1.5 rounded-full transition-all duration-500 ${
-                                isIdle ? 'bg-amber-400' : 'bg-emerald-400'
-                              }`}
-                              style={{ width: `${Math.min(100, c.cpuUtilVsLimit !== undefined ? c.cpuUtilVsLimit : (c.cpuUsedCores / c.cpuLimitCores) * 100)}%` }}
-                            ></div>
-                          </div>
-                        </div>
+                        {(() => {
+                          const cpuVal = c.cpuUtilVsLimit !== undefined ? c.cpuUtilVsLimit : c.cpuPercent;
+                          const isDeficit = cpuVal >= 85;
+                          return (
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-slate-300">
+                                <span className={`font-bold ${isDeficit ? 'text-rose-400' : isIdle ? 'text-amber-300' : 'text-white'}`}>
+                                  {Number(cpuVal).toFixed(2)}% {isDeficit ? '⚠️' : ''}
+                                </span>
+                                <span className="text-slate-400">({Number(c.cpuUsedCores).toFixed(3)} / {c.cpuLimitCores} Cores)</span>
+                              </div>
+                              <div className="w-full bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                                <div
+                                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                                    isDeficit ? 'bg-rose-500 shadow-sm shadow-rose-500/50' : isIdle ? 'bg-amber-400' : 'bg-emerald-400'
+                                  }`}
+                                  style={{ width: `${Math.min(100, cpuVal)}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="py-4 px-4 font-mono text-xs">
                         <div className="space-y-1">
@@ -182,15 +188,28 @@ export default function LiveDataSource() {
                         ₹{c.costPerHour?.toFixed(2)}/hr
                       </td>
                       <td className="py-4 px-6 text-right">
-                        {isIdle ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                            Idle (Wasteful)
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                            Active (Efficient)
-                          </span>
-                        )}
+                        {(() => {
+                          const cpuVal = c.cpuUtilVsLimit !== undefined ? c.cpuUtilVsLimit : c.cpuPercent;
+                          if (cpuVal >= 85) {
+                            return (
+                              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                                ⚠️ Deficit (Saturated)
+                              </span>
+                            );
+                          }
+                          if (isIdle) {
+                            return (
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                                Idle (Wasteful)
+                              </span>
+                            );
+                          }
+                          return (
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                              Active (Optimal)
+                            </span>
+                          );
+                        })()}
                       </td>
                     </tr>
                   );

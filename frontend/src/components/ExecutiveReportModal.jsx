@@ -53,7 +53,7 @@ export default function ExecutiveReportModal({ isOpen, onClose, summary, analyti
               Infrastructure Efficiency Evaluation
             </h3>
             <p className="text-sm text-slate-300 leading-relaxed">
-              Based on empirical telemetry gathered via the Docker Engine API across 12 microservices, the cluster is currently operating at an overall FinOps Efficiency Score of <strong className="text-amber-400 font-mono">{efficiencyScore}/100 ({rating})</strong>. Resource over-provisioning has been identified across <strong>{waste?.length || 0} containers</strong>.
+              Based on empirical telemetry gathered via the Docker Engine API across 19 microservices in 5 engineering departments, the cluster is currently operating at an overall FinOps Efficiency Score of <strong className="text-amber-400 font-mono">{efficiencyScore}/100 ({rating})</strong>. Resource over-provisioning and capacity deficits have been evaluated across <strong>all monitored workloads</strong>.
             </p>
           </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import Recommendations from '../Recommendations';
-import { Lightbulb, FileText, Filter, Sparkles } from 'lucide-react';
+import { Lightbulb, FileText, Filter, Sparkles, RefreshCw } from 'lucide-react';
 
 export default function RecommendationsAuditTab({
   recommendations,
@@ -8,7 +8,8 @@ export default function RecommendationsAuditTab({
   setTeamFilter,
   severityFilter,
   setSeverityFilter,
-  onOpenReportModal
+  onOpenReportModal,
+  lastUpdated
 }) {
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -22,13 +23,21 @@ export default function RecommendationsAuditTab({
           <p className="text-sm text-slate-400">Automated right-sizing recommendations and mentor audit report generator</p>
         </div>
 
-        <button
-          onClick={onOpenReportModal}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold rounded-xl shadow-lg transition-all"
-        >
-          <FileText className="w-4 h-4" />
-          Export Executive Audit Report
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {lastUpdated && (
+            <div className="text-xs text-slate-300 flex items-center gap-2 font-mono bg-[#090d16] px-3 py-1.5 rounded-xl border border-[#1e293b] shadow-sm">
+              <RefreshCw className="w-3.5 h-3.5 text-sky-400 animate-spin" style={{ animationDuration: '3s' }} />
+              <span>Last polled: <strong className="text-white">{lastUpdated.toLocaleTimeString()}</strong></span>
+            </div>
+          )}
+          <button
+            onClick={onOpenReportModal}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold rounded-xl shadow-lg transition-all"
+          >
+            <FileText className="w-4 h-4" />
+            Export Executive Audit Report
+          </button>
+        </div>
       </div>
 
       {/* Interactive Filters Bar */}

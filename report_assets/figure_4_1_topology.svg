@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 500" width="1100" height="500" style="background:white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#334155"/>
+    </marker>
+    <filter id="shadow" x="-3%" y="-3%" width="106%" height="108%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Top Row Boxes -->
+  <!-- Box 1: Multi-Container Ingestion -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="50" width="280" height="150" rx="16" ry="16" fill="#eef6ff" stroke="#2563eb" stroke-width="2.5"/>
+    <text x="180" y="105" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">Multi-Container Ingestion</text>
+    <text x="180" y="135" text-anchor="middle" font-size="13" fill="#3b82f6">Docker Socket (/var/run/docker.sock)</text>
+    <text x="180" y="155" text-anchor="middle" font-size="13" fill="#3b82f6">cgroups Metrics &amp; Team Metadata</text>
+  </g>
+
+  <!-- Box 2: Telemetry Normalization Layer -->
+  <g filter="url(#shadow)">
+    <rect x="410" y="50" width="280" height="150" rx="16" ry="16" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.5"/>
+    <text x="550" y="100" text-anchor="middle" font-size="17" font-weight="700" fill="#14532d">Telemetry Normalization</text>
+    <text x="550" y="125" text-anchor="middle" font-size="17" font-weight="700" fill="#14532d">&amp; Smoothing Layer</text>
+    <text x="550" y="150" text-anchor="middle" font-size="13" fill="#15803d">Limit-Aligned Scaling (0.95/2 = 47.5%)</text>
+    <text x="550" y="170" text-anchor="middle" font-size="13" fill="#15803d">EMA Jitter Mitigation Filter (&#945; = 0.4)</text>
+  </g>
+
+  <!-- Box 3: Failure & Drift Monitor -->
+  <g filter="url(#shadow)">
+    <rect x="780" y="50" width="280" height="150" rx="16" ry="16" fill="#f0fdf4" stroke="#15803d" stroke-width="2.5"/>
+    <text x="920" y="105" text-anchor="middle" font-size="18" font-weight="700" fill="#14532d">Anomaly &amp; Waste Monitor</text>
+    <text x="920" y="135" text-anchor="middle" font-size="13" fill="#15803d">&lt;20% Idle Workload Classifier</text>
+    <text x="920" y="155" text-anchor="middle" font-size="13" fill="#15803d">State-Drift &amp; Degraded Recovery</text>
+  </g>
+
+  <!-- Bottom Row Boxes -->
+  <!-- Box 4: O2 Reference Baseline Engine -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="280" width="280" height="150" rx="16" ry="16" fill="#f8fafc" stroke="#64748b" stroke-width="2.5"/>
+    <text x="180" y="335" text-anchor="middle" font-size="18" font-weight="700" fill="#1e293b">O2 Reference Baseline</text>
+    <text x="180" y="365" text-anchor="middle" font-size="13" fill="#475569">Raw Host-Relative CPU/Mem Signals</text>
+    <text x="180" y="385" text-anchor="middle" font-size="13" fill="#475569">Unfiltered Telemetry Oracle</text>
+  </g>
+
+  <!-- Box 5: O3 FinOps Analytics Engine -->
+  <g filter="url(#shadow)">
+    <rect x="410" y="280" width="280" height="150" rx="16" ry="16" fill="#fffbeb" stroke="#d97706" stroke-width="2.5"/>
+    <text x="550" y="335" text-anchor="middle" font-size="18" font-weight="700" fill="#78350f">O3 FinOps Cost Engine</text>
+    <text x="550" y="365" text-anchor="middle" font-size="13" fill="#b45309">Team Attribution (Platform, Growth, Infra)</text>
+    <text x="550" y="385" text-anchor="middle" font-size="13" fill="#b45309">INR (&#8377;) Right-Sizing Savings Engine</text>
+  </g>
+
+  <!-- Box 6: Executive Dashboard & Audit -->
+  <g filter="url(#shadow)">
+    <rect x="780" y="280" width="280" height="150" rx="16" ry="16" fill="#faf5ff" stroke="#7c3aed" stroke-width="2.5"/>
+    <text x="920" y="335" text-anchor="middle" font-size="18" font-weight="700" fill="#4c1d95">Evaluation &amp; Telemetry</text>
+    <text x="920" y="365" text-anchor="middle" font-size="13" fill="#6d28d9">AC-1..AC-4 Acceptance Harness</text>
+    <text x="920" y="385" text-anchor="middle" font-size="13" fill="#6d28d9">KPI-1..KPI-6 &amp; NT-1..NT-5 Suite</text>
+  </g>
+
+  <!-- Connecting Arrows -->
+  <!-- Box 1 -> Box 2 (FR-1) -->
+  <path d="M 320 125 L 406 125" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="365" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">FR-1</text>
+
+  <!-- Box 2 -> Box 3 (FR-4) -->
+  <path d="M 690 125 L 776 125" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="735" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">FR-4</text>
+
+  <!-- Box 1 -> Box 4 (FR-2) -->
+  <path d="M 180 200 L 180 276" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="155" y="245" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">FR-2</text>
+
+  <!-- Box 4 -> Box 5 (Baseline) -->
+  <path d="M 320 355 L 406 355" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="365" y="345" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">Baseline</text>
+
+  <!-- Box 2 -> Box 5 (Normalized Stream) -->
+  <path d="M 550 200 L 550 276" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="635" y="245" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">Normalized Limits</text>
+
+  <!-- Box 5 -> Box 6 (FR-3) -->
+  <path d="M 690 355 L 776 355" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="735" y="345" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">FR-3</text>
+
+  <!-- Box 3 -> Box 6 (NT-1..5) -->
+  <path d="M 920 200 L 920 276" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="975" y="245" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">NT-1..5</text>
+</svg>

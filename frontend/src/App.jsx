@@ -26,6 +26,7 @@ import TeamCostAttributionTab from './components/tabs/TeamCostAttributionTab';
 import ResourceProfileTab from './components/tabs/ResourceProfileTab';
 import RecommendationsAuditTab from './components/tabs/RecommendationsAuditTab';
 import ExecutiveReportModal from './components/ExecutiveReportModal';
+import { socket } from './socket';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('live');
@@ -33,10 +34,12 @@ export default function App() {
   const [teamsData, setTeamsData] = useState([]);
   const [trendData, setTrendData] = useState([]);
   const [wasteData, setWasteData] = useState([]);
+  const [allContainersData, setAllContainersData] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   // Filter States
   const [teamFilter, setTeamFilter] = useState('All');
@@ -58,7 +61,10 @@ export default function App() {
       if (summaryRes.data?.success) setSummaryData(summaryRes.data.summary);
       if (teamsRes.data?.success) setTeamsData(teamsRes.data.teams);
       if (trendRes.data?.success) setTrendData(trendRes.data.trend);
-      if (wasteRes.data?.success) setWasteData(wasteRes.data.containers);
+      if (wasteRes.data?.success) {
+        setWasteData(wasteRes.data.containers || []);
+        if (wasteRes.data.allContainers) setAllContainersData(wasteRes.data.allContainers);
+      }
       if (recsRes.data?.success) setRecommendations(recsRes.data.recommendations);
       if (analyticsRes.data?.success) setAnalyticsData(analyticsRes.data.analytics);
     } catch (err) {
@@ -70,6 +76,72 @@ export default function App() {
 
   useEffect(() => {
     fetchDashboardData();
+
+    function onWasteStats(data) {
+      if (!data) return;
+      setLastUpdated(new Date(data.timestamp || Date.now()));
+      if (data.allContainers) setAllContainersData(data.allContainers);
+      if (data.containers) setWasteData(data.containers);
+      else if (data.wastefulContainers) setWasteData(data.wastefulContainers);
+      if (data.recommendations) setRecommendations(data.recommendations);
+      if (data.summary) {
+        setSummaryData(prev => ({
+          ...(prev || {}),
+          total30DaySpend: data.summary.totalCurrentMonthlyCost || prev?.total30DaySpend || 280465,
+          totalWastefulContainers: data.summary.totalWastefulCount,
+          potentialMonthlySavings: data.summary.totalPotentialMonthlySavings,
+          potentialSavingsPercentage: data.summary.potentialSavingsPercentage,
+          totalContainers: data.allContainers?.length || 19,
+          totalTeams: data.analytics?.teamComparison?.length || 5
+        }));
+      }
+      if (data.analytics) {
+        setAnalyticsData(data.analytics);
+        if (data.analytics.teamComparison) {
+          setTeamsData(data.analytics.teamComparison.map(t => ({
+            team: t.team,
+            containerCount: t.containerCount,
+            monthlySpend: t.currentSpend,
+            actualUsedSpend: t.actualUsedSpend || Math.round(t.currentSpend * ((t.cpuUtilPercent || 15) / 100)),
+            targetSpend: t.targetSpend,
+            savings: t.savings
+          })));
+        }
+      } else if (data.severityDistribution) {
+        setAnalyticsData(prev => ({
+          ...(prev || {}),
+          severityDistribution: data.severityDistribution
+        }));
+      }
+
+      if (data.summary?.totalCurrentMonthlyCost) {
+        setTrendData(prev => {
+          if (!prev || prev.length === 0) return prev;
+          const updated = [...prev];
+          const lastIdx = updated.length - 1;
+          const dailyCost = Math.round(data.summary.totalCurrentMonthlyCost / 30);
+          if (updated[lastIdx].dailyCost !== dailyCost) {
+            updated[lastIdx] = { ...updated[lastIdx], dailyCost };
+            return updated;
+          }
+          return prev;
+        });
+      }
+    }
+
+    function onContainerStats(data) {
+      if (data && data.timestamp) {
+        setLastUpdated(new Date(data.timestamp));
+      }
+    }
+
+    socket.on('waste-stats', onWasteStats);
+    socket.on('container-stats', onContainerStats);
+
+    return () => {
+      socket.off('waste-stats', onWasteStats);
+      socket.off('container-stats', onContainerStats);
+    };
   }, []);
 
   // Filtered Waste Containers
@@ -89,7 +161,7 @@ export default function App() {
   const tabs = [
     { id: 'live', label: 'Live Telemetry Stream', icon: Activity, badge: 'Live 2s' },
     { id: 'analytics', label: 'Cost Analytics', icon: BarChart3 },
-    { id: 'waste', label: 'Waste & Right-Sizing', icon: AlertOctagon, alertCount: wasteData.length },
+    { id: 'waste', label: 'Waste & Right-Sizing', icon: AlertOctagon, alertCount: wasteData.filter(w => w.status === 'Wasteful' || w.status === 'Under-Provisioned').length },
     { id: 'attribution', label: 'Team Cost Attribution', icon: Users },
     { id: 'profile', label: 'Resource Correlation', icon: Layers },
     { id: 'recommendations', label: 'Recommendations & Audit', icon: Lightbulb }
@@ -220,6 +292,13 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            {lastUpdated && (
+              <div className="hidden sm:flex items-center gap-2 text-xs text-slate-300 bg-[#090d16] px-3.5 py-2 rounded-xl border border-[#1e293b] font-mono shadow-sm">
+                <RefreshCw className="w-3.5 h-3.5 text-sky-400 animate-spin" style={{ animationDuration: '3s' }} />
+                <span>Last polled: <strong className="text-white">{lastUpdated.toLocaleTimeString()}</strong></span>
+              </div>
+            )}
+
             <button
               onClick={() => setIsReportModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold rounded-xl shadow-lg shadow-sky-500/20 transition-all"
@@ -249,6 +328,7 @@ export default function App() {
               analyticsData={analyticsData}
               teamsData={teamsData}
               trendData={trendData}
+              lastUpdated={lastUpdated}
             />
           )}
 
@@ -256,7 +336,9 @@ export default function App() {
             <WasteRightSizingTab
               analyticsData={analyticsData}
               wasteData={filteredWaste}
+              allContainersData={allContainersData}
               summaryData={summaryData}
+              lastUpdated={lastUpdated}
             />
           )}
 
@@ -264,12 +346,14 @@ export default function App() {
             <TeamCostAttributionTab
               analyticsData={analyticsData}
               teamsData={teamsData}
+              lastUpdated={lastUpdated}
             />
           )}
 
           {activeTab === 'profile' && (
             <ResourceProfileTab
               analyticsData={analyticsData}
+              lastUpdated={lastUpdated}
             />
           )}
 
@@ -281,6 +365,7 @@ export default function App() {
               severityFilter={severityFilter}
               setSeverityFilter={setSeverityFilter}
               onOpenReportModal={() => setIsReportModalOpen(true)}
+              lastUpdated={lastUpdated}
             />
           )}
         </main>

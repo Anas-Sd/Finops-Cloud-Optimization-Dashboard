@@ -1,8 +1,8 @@
 import React from 'react';
 import CpuMemCorrelationChart from '../CpuMemCorrelationChart';
-import { Layers, Cpu, HardDrive, Zap } from 'lucide-react';
+import { Layers, Cpu, HardDrive, Zap, RefreshCw } from 'lucide-react';
 
-export default function ResourceProfileTab({ analyticsData }) {
+export default function ResourceProfileTab({ analyticsData, lastUpdated }) {
   const containerList = analyticsData?.containerUtilizationList || [];
 
   return (
@@ -15,6 +15,18 @@ export default function ResourceProfileTab({ analyticsData }) {
             Resource Profile &amp; Correlation Matrix
           </h2>
           <p className="text-sm text-slate-400">Comparing CPU vs Memory utilization across container workloads</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {lastUpdated && (
+            <div className="text-xs text-slate-300 flex items-center gap-2 font-mono bg-[#090d16] px-3 py-1.5 rounded-xl border border-[#1e293b] shadow-sm">
+              <RefreshCw className="w-3.5 h-3.5 text-sky-400 animate-spin" style={{ animationDuration: '3s' }} />
+              <span>Last polled: <strong className="text-white">{lastUpdated.toLocaleTimeString()}</strong></span>
+            </div>
+          )}
+          <span className="text-xs bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full font-mono font-bold border border-emerald-500/30 flex items-center gap-1.5 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Live 2s Sync
+          </span>
         </div>
       </div>
 
@@ -30,21 +42,30 @@ export default function ResourceProfileTab({ analyticsData }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {containerList.map((c) => {
-            const isIdle = c.cpuPercent < 5;
+            const isDeficit = c.cpuPercent >= 85;
+            const isIdle = c.cpuPercent < 20;
 
             return (
               <div
                 key={c.containerName}
-                className={`bg-slate-800/80 border rounded-xl p-5 shadow-xl backdrop-blur-sm space-y-3 transition-all ${
-                  isIdle ? 'border-amber-500/30 bg-amber-950/10' : 'border-slate-700/60'
+                className={`border rounded-xl p-5 shadow-xl backdrop-blur-sm space-y-3 transition-all ${
+                  isDeficit 
+                    ? 'border-rose-500/40 bg-rose-950/20 hover:border-rose-500/60'
+                    : isIdle 
+                    ? 'border-amber-500/30 bg-[#0f172a]/90 hover:border-amber-500/50' 
+                    : 'border-slate-700/60 bg-[#0f172a]/90 hover:border-emerald-500/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-bold text-white text-sm">{c.containerName}</span>
-                  <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                    isIdle ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${
+                    isDeficit
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                      : isIdle
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                   }`}>
-                    {isIdle ? 'Idle / Over-provisioned' : 'Active / Efficient'}
+                    {isDeficit ? '⚠️ Capacity Deficit' : isIdle ? 'Idle / Wasteful' : 'Optimal / Efficient'}
                   </span>
                 </div>
 

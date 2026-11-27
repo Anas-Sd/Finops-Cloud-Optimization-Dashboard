@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { analyzeWasteAndRecommendations } = require('../services/wasteDetector');
+const { getLatestLiveStats } = require('../services/dockerMonitor');
 
 /**
  * GET /api/waste
@@ -8,12 +9,17 @@ const { analyzeWasteAndRecommendations } = require('../services/wasteDetector');
  */
 router.get('/', (req, res) => {
   try {
-    const wasteData = analyzeWasteAndRecommendations();
+    const liveStats = getLatestLiveStats();
+    const wasteData = analyzeWasteAndRecommendations(liveStats);
     res.json({
       success: true,
-      count: wasteData.wastefulContainers.length,
+      count: wasteData.allContainers.length,
+      wastefulCount: wasteData.wastefulContainers.length,
+      severityDistribution: wasteData.severityDistribution,
       summary: wasteData.summary,
-      containers: wasteData.wastefulContainers
+      containers: wasteData.allContainers,
+      wastefulContainers: wasteData.wastefulContainers,
+      allContainers: wasteData.allContainers
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -26,7 +32,8 @@ router.get('/', (req, res) => {
  */
 router.get('/recommendations', (req, res) => {
   try {
-    const wasteData = analyzeWasteAndRecommendations();
+    const liveStats = getLatestLiveStats();
+    const wasteData = analyzeWasteAndRecommendations(liveStats);
     res.json({
       success: true,
       count: wasteData.recommendations.length,

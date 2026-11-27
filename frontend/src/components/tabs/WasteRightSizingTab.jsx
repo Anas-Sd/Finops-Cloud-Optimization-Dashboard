@@ -1,9 +1,9 @@
 import React from 'react';
 import SeverityPieChart from '../SeverityPieChart';
 import WasteTable from '../WasteTable';
-import { AlertOctagon, TrendingDown, ShieldAlert } from 'lucide-react';
+import { AlertOctagon, TrendingDown, ShieldAlert, RefreshCw } from 'lucide-react';
 
-export default function WasteRightSizingTab({ analyticsData, wasteData, summaryData }) {
+export default function WasteRightSizingTab({ analyticsData, wasteData, allContainersData = [], summaryData, lastUpdated }) {
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Header Banner */}
@@ -15,10 +15,19 @@ export default function WasteRightSizingTab({ analyticsData, wasteData, summaryD
           </h2>
           <p className="text-sm text-slate-400">Identification of underutilized workloads (&lt;20% usage) and safety-buffered right-sizing</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {lastUpdated && (
+            <div className="text-xs text-slate-300 flex items-center gap-2 font-mono bg-[#090d16] px-3 py-1.5 rounded-xl border border-[#1e293b] shadow-sm">
+              <RefreshCw className="w-3.5 h-3.5 text-sky-400 animate-spin" style={{ animationDuration: '3s' }} />
+              <span>Last polled: <strong className="text-white">{lastUpdated.toLocaleTimeString()}</strong></span>
+            </div>
+          )}
           <div className="text-right">
-            <span className="text-xs text-slate-400 block">Identified Monthly Savings</span>
-            <span className="text-lg font-extrabold text-emerald-400 font-mono">
+            <span className="text-xs text-slate-400 flex items-center justify-end gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Live Identified Monthly Savings
+            </span>
+            <span className="text-xl font-extrabold text-emerald-400 font-mono tracking-tight">
               ₹{(summaryData?.potentialMonthlySavings || 0).toLocaleString('en-IN')}/mo
             </span>
           </div>
@@ -54,7 +63,7 @@ export default function WasteRightSizingTab({ analyticsData, wasteData, summaryD
       </div>
 
       {/* Detailed Wasteful Workloads Table */}
-      <WasteTable waste={wasteData} />
+      <WasteTable waste={wasteData} allContainers={allContainersData} />
     </div>
   );
 }
